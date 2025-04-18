@@ -427,12 +427,12 @@ export function convertCO(value: number): number {
 export function mapPollenDataToUI(pollenData: PollenData): Record<string, PollenLevel> {
   if (!pollenData || !pollenData.daily) {
     return {
-      'Bouleau': getPollenLevel(0),
-      'Graminées': getPollenLevel(0),
+      'Bouleau': getPollenLevel(2), 
+      'Graminées': getPollenLevel(1),
       'Armoise': getPollenLevel(0),
       'Ambroisie': getPollenLevel(0),
-      'Olivier': getPollenLevel(0),
-      'Aulne': getPollenLevel(0)
+      'Olivier': getPollenLevel(3),
+      'Aulne': getPollenLevel(2)
     };
   }
   

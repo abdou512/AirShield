@@ -14,7 +14,7 @@ const Header = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
         <div className="flex items-center">
           <Wind className="text-blue-500 h-6 w-6 mr-2" />
-          <h1 className="text-xl font-semibold text-blue-600">AirInfo</h1>
+          <h1 className="text-xl font-semibold text-blue-600">AirShield</h1>
         </div>
         
         <div className="flex items-center space-x-2">

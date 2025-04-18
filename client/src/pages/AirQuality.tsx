@@ -1,14 +1,42 @@
 import { AirQualityData } from '../types';
 import { Card, CardContent } from '@/components/ui/card';
-import { 
-  getAQICategory, 
-  getPollutantLevel, 
-  getPollutantName, 
-  getPollutantDescription, 
+import {
+  getAQICategory,
+  getPollutantLevel,
+  getPollutantName,
+  getPollutantDescription,
   getPollutantImpact,
   convertCO
 } from '../lib/helpers';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconRetina from 'leaflet/dist/images/marker-icon-2x.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+import { useState } from 'react';
+
+const getAQIColor = (level) => {
+  switch (level) {
+    case 'good': return "bg-green-400";   // Très faible
+    case 'moderate': return "bg-yellow-400";  // Faible
+    case 'poor': return "bg-orange-400";  // Modéré
+    case 'very-poor': return "bg-red-500";     // Élevé
+    case 'extremely-poor': return "bg-purple-600";  // Très élevé
+    default: return "bg-gray-300";   // Par défaut
+  }
+};
+
+
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: iconRetina,
+  iconUrl: icon,
+  shadowUrl: iconShadow,
+});
 
 interface AirQualityProps {
   airQualityData: AirQualityData;
@@ -17,7 +45,7 @@ interface AirQualityProps {
 const AirQuality = ({ airQualityData }: AirQualityProps) => {
   const currentAQI = airQualityData.current.european_aqi;
   const aqiCategory = getAQICategory(currentAQI);
-  
+
   // Process pollutants data
   const pollutants = {
     'PM2.5': getPollutantLevel('PM2.5', airQualityData.current.pm2_5),
@@ -38,12 +66,12 @@ const AirQuality = ({ airQualityData }: AirQualityProps) => {
   return (
     <div>
       <h2 className="text-2xl font-semibold mb-6">Qualité de l'air</h2>
-      
+
       {/* AQI Details */}
       <Card className="mb-6">
         <CardContent className="p-6">
           <h3 className="text-lg font-medium text-slate-900 mb-4">Indice de qualité de l'air (AQI)</h3>
-          
+
           <div className="flex flex-col md:flex-row md:items-center md:justify-between">
             <div className="mb-4 md:mb-0">
               <div className="text-5xl font-bold">{currentAQI}</div>
@@ -52,7 +80,7 @@ const AirQuality = ({ airQualityData }: AirQualityProps) => {
               </div>
               <p className="text-sm text-slate-600 mt-2">{aqiCategory.description}</p>
             </div>
-            
+
             <div className="h-48 w-full md:w-1/3">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={aqiChartData}>
@@ -60,18 +88,18 @@ const AirQuality = ({ airQualityData }: AirQualityProps) => {
                   <XAxis dataKey="time" />
                   <YAxis />
                   <Tooltip />
-                  <Line 
-                    type="monotone" 
-                    dataKey="aqi" 
-                    stroke="#3b82f6" 
-                    activeDot={{ r: 8 }} 
+                  <Line
+                    type="monotone"
+                    dataKey="aqi"
+                    stroke="#3b82f6"
+                    activeDot={{ r: 8 }}
                     name="AQI"
                   />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           </div>
-          
+
           <div className="mt-6">
             <h4 className="text-sm font-medium text-slate-700 mb-2">Échelle AQI</h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2">
@@ -91,12 +119,12 @@ const AirQuality = ({ airQualityData }: AirQualityProps) => {
           </div>
         </CardContent>
       </Card>
-      
+
       {/* Pollutants Details */}
       <Card className="mb-6">
         <CardContent className="p-6">
           <h3 className="text-lg font-medium text-slate-900 mb-4">Détail des polluants</h3>
-          
+
           <div className="space-y-6">
             {Object.entries(pollutants).map(([key, value]) => (
               <div key={key}>
@@ -110,14 +138,14 @@ const AirQuality = ({ airQualityData }: AirQualityProps) => {
                     <div className={`text-sm aqi-${value.level}`}>{value.status}</div>
                   </div>
                 </div>
-                
+
                 <div className="w-full bg-slate-200 rounded-full h-2 mb-2">
-                  <div 
-                    className={`h-2 rounded-full bg-aqi-${value.level}`} 
+                  <div
+                    className={`h-2 rounded-full ${getAQIColor(value.level)}`}
                     style={{ width: `${value.percentage}%` }}
                   ></div>
                 </div>
-                
+
                 <div className="text-xs text-slate-500">{getPollutantImpact(key)}</div>
               </div>
             ))}
@@ -128,25 +156,37 @@ const AirQuality = ({ airQualityData }: AirQualityProps) => {
       {/* Air Quality Map */}
       <Card>
         <CardContent className="p-6">
-          <h3 className="text-lg font-medium text-slate-900 mb-4">Carte de la qualité de l'air</h3>
-          <div className="aspect-[16/9] bg-slate-100 rounded-lg flex items-center justify-center">
-            <div className="text-center p-8">
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                className="h-16 w-16 text-slate-400 mb-2 mx-auto" 
-                fill="none" 
-                viewBox="0 0 24 24" 
-                stroke="currentColor"
-              >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={1.5} 
-                  d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" 
-                />
-              </svg>
-              <p className="text-sm text-slate-500">Carte des stations de mesure proches</p>
-            </div>
+          <h3 className="text-lg font-medium text-slate-900 mb-4">
+            Carte de la qualité de l'air
+          </h3>
+
+          <div className="aspect-[16/9] rounded-lg overflow-hidden">
+            <MapContainer
+              center={[36.75, 3.04]} // Alger par défaut
+              zoom={11}
+              scrollWheelZoom={false}
+              className="h-full w-full"
+            >
+              <TileLayer
+                attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+
+              {/* Exemples de stations */}
+              <Marker position={[36.75, 3.04]}>
+                <Popup>
+                  Station d'Alger<br />
+                  PM2.5: 45 µg/m³
+                </Popup>
+              </Marker>
+
+              <Marker position={[36.77, 3.05]}>
+                <Popup>
+                  Station Bab El Oued<br />
+                  PM2.5: 52 µg/m³
+                </Popup>
+              </Marker>
+            </MapContainer>
           </div>
         </CardContent>
       </Card>

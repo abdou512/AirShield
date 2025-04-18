@@ -16,6 +16,8 @@ export async function fetchPollenData(latitude: number, longitude: number): Prom
   const response = await fetch(
     `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${latitude}&longitude=${longitude}&daily=alder_pollen,birch_pollen,grass_pollen,mugwort_pollen,olive_pollen,ragweed_pollen&timezone=auto`
   );
+  console.log("response", response);
+  
   
   if (!response.ok) {
     throw new Error(`Erreur lors de la récupération des données de pollen: ${response.status}`);

@@ -183,6 +183,8 @@ export function getPollutantLevel(pollutant: string, value: number): Pollutant {
 
 // Get pollen level based on value (0-1: Low, 2-3: Moderate, 4-5: High)
 export function getPollenLevel(value: number): PollenLevel {
+  // console.log(value);
+  
   if (value <= 1) {
     return {
       label: 'Très faible',

@@ -68,7 +68,7 @@ app.use((req, res, next) => {
   //   log(`serving on port ${port}`);
   // });
 
-const HOST = process.env.HOST || 'localhost'; // localhost pour Windows
+const HOST = process.env.HOST || '0.0.0.0'; // localhost pour Windows
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 5000; // 5000 par défaut
 
 app.listen(PORT, HOST, () => {

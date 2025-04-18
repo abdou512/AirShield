@@ -9,6 +9,9 @@ import {
   convertCO
 } from '../lib/helpers';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
 
 interface AirQualityProps {
   airQualityData: AirQualityData;
@@ -127,29 +130,32 @@ const AirQuality = ({ airQualityData }: AirQualityProps) => {
 
       {/* Air Quality Map */}
       <Card>
-        <CardContent className="p-6">
-          <h3 className="text-lg font-medium text-slate-900 mb-4">Carte de la qualité de l'air</h3>
-          <div className="aspect-[16/9] bg-slate-100 rounded-lg flex items-center justify-center">
-            <div className="text-center p-8">
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                className="h-16 w-16 text-slate-400 mb-2 mx-auto" 
-                fill="none" 
-                viewBox="0 0 24 24" 
-                stroke="currentColor"
-              >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={1.5} 
-                  d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" 
-                />
-              </svg>
-              <p className="text-sm text-slate-500">Carte des stations de mesure proches</p>
+      <CardContent className="p-6">
+        <h3 className="text-lg font-medium text-slate-900 mb-4">Carte de la qualité de l'air</h3>
+
+        <div className="aspect-[16/9] bg-slate-100 rounded-lg overflow-hidden">
+          {position ? (
+            <MapContainer
+              center={position}
+              zoom={13}
+              style={{ height: "100%", width: "100%" }}
+            >
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
+              />
+              <Marker position={position} icon={L.icon({ iconUrl: "https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png", iconSize: [25, 41], iconAnchor: [12, 41] })}>
+                <Popup>Vous êtes ici</Popup>
+              </Marker>
+            </MapContainer>
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-slate-500">Chargement de la position...</p>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          )}
+        </div>
+      </CardContent>
+    </Card>
     </div>
   );
 };

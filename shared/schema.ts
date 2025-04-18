@@ -1,6 +1,6 @@
 import { pgTable, text, serial, integer, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod";
+import { array, z } from "zod";
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -11,6 +11,8 @@ export const users = pgTable("users", {
   allergy: text("allergy"),
   age: integer("age").notNull(),
   sexe: text("sexe").notNull(),
+  poids : integer("poids").notNull(),
+  taille : integer("taille").notNull(),
   password: text("password").notNull(),
   created_at: timestamp("created_at").defaultNow().notNull(),
 });

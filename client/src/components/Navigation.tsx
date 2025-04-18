@@ -48,7 +48,7 @@ const Navigation = ({ activeTab, setActiveTab }: NavigationProps) => {
           >
             Météo
           </button>
-          <button 
+          {/* <button 
             onClick={() => setActiveTab('history')} 
             className={`py-4 px-1 font-medium text-sm whitespace-nowrap ${
               activeTab === 'history' 
@@ -57,7 +57,7 @@ const Navigation = ({ activeTab, setActiveTab }: NavigationProps) => {
             }`}
           >
             Historique
-          </button>
+          </button> */}
         </div>
       </div>
     </div>

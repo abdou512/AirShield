@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { z } from "zod";
 import { insertUserSchema } from "@shared/schema";
 import { User } from "./models/users"; // Mongoose user model
+import { setupAuth } from "./auth"; // Auth middleware
 
 const router = express.Router();
 
@@ -32,6 +33,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Air Quality Proxy Endpoint
   app.get("/api/air-quality", async (req, res) => {
+    setupAuth(app);
     try {
       const lat = req.query.latitude;
       const lon = req.query.longitude;

@@ -17,6 +17,10 @@ import L from 'leaflet';
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconRetina from 'leaflet/dist/images/marker-icon-2x.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+<<<<<<< HEAD
+=======
+import { useState } from 'react';
+>>>>>>> f62b43c6b96c0f79b98aa9fd5eba3a28eea27579
 
 const getAQIColor = (level) => {
   switch (level) {

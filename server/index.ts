@@ -57,7 +57,7 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-const HOST = process.env.HOST || 'localhost'; // localhost pour Windows
+const HOST = process.env.HOST || '0.0.0.0'; // localhost pour Windows
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 5000; // 5000 par défaut
 
 const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://aziz:V3LS3jEpKktqOxBO@airshield.xodcwmy.mongodb.net/?retryWrites=true&w=majority&appName=airshield";
@@ -66,7 +66,7 @@ mongoose.connect(MONGO_URI)
   .then(() => console.log("✅ Connected to MongoDB"))
   .catch(err => console.error("❌ MongoDB connection error:", err));
 
-app.listen(PORT, HOST, () => {
-  console.log(`✅ Server is running at http://${HOST}:${PORT}`);
+app.listen(PORT, () => {
+  console.log(`✅ Server is running `);
 });
 })();

@@ -13,7 +13,10 @@ type AuthContextType = {
   registerMutation: ReturnType<typeof useRegisterMutation>;
 };
 
-type LoginData = Pick<InsertUser, "username" | "password">;
+type LoginData = {
+  username: string;
+  password: string;
+};
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -29,7 +32,7 @@ function useLoginMutation() {
       queryClient.setQueryData(["/api/user"], user);
       toast({
         title: "Connexion réussie",
-        description: `Bienvenue, ${user.username}!`,
+        description: `Bienvenue, ${user.firstname}!`,
       });
     },
     onError: (error: Error) => {
@@ -54,7 +57,7 @@ function useRegisterMutation() {
       queryClient.setQueryData(["/api/user"], user);
       toast({
         title: "Inscription réussie",
-        description: `Bienvenue, ${user.username}!`,
+        description: `Bienvenue, ${user.firstname}!`,
       });
     },
     onError: (error: Error) => {
@@ -97,7 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     error,
     isLoading,
   } = useQuery<User | null, Error>({
-    queryKey: ["/api/user"],
+    queryKey: ["/users"],
     queryFn: getQueryFn({ on401: "returnNull" }),
   });
 

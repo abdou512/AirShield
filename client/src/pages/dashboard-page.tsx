@@ -11,7 +11,7 @@ export default function DashboardPage() {
 
   // Set the user profile from the user data if available
   if (user && !userProfile) {
-    setUserProfile(user.profile === 'sensible' ? 'sensible' : 'public');
+    setUserProfile(user.illness === 'sensible' ? 'sensible' : 'public');
   }
 
   if (isLoading) {

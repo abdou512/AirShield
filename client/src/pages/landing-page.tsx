@@ -47,12 +47,12 @@ export default function LandingPage() {
             <a href="#how-it-works" className="text-slate-700 hover:text-sky-600 transition-colors">
               Comment ça marche
             </a>
-            <Link href="/auth">
+            <Link href="/login">
               <Button variant="outline" className="ml-2">
                 Connexion
               </Button>
             </Link>
-            <Link href="/auth?register=true">
+            <Link href="/register">
               <Button className="bg-sky-600 hover:bg-sky-700">
                 Inscription
               </Button>

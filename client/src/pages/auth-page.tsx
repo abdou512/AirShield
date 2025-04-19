@@ -17,17 +17,21 @@ import { Loader2, Wind, ChevronLeft } from "lucide-react";
 const loginSchema = insertUserSchema.pick({ username: true, password: true });
 
 // Extend the user schema for registration and add password confirmation
-const registerSchema = insertUserSchema
-  .extend({
-    confirmPassword: z.string().min(6, {
-      message: "Le mot de passe de confirmation doit comporter au moins 6 caractères.",
-    }),
-    display_name: z.string().optional(),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Les mots de passe ne correspondent pas.",
-    path: ["confirmPassword"],
-  });
+const registerSchema = z.object({
+  firstname: z.string().min(1, "Prénom requis"),
+  lastname: z.string().min(1, "Nom requis"),
+  email: z.string().email("Email invalide"),
+  age: z.coerce.number().min(1, "Âge requis"),
+  sexe: z.enum(["Homme", "Femme", "Autre"]),
+  illness: z.array(z.string()).optional(),
+  allergy: z.array(z.string()).optional(),
+  password: z.string().min(6, "Mot de passe requis"),
+  confirmPassword: z.string().min(6, "Confirmation requise")
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Les mots de passe ne correspondent pas.",
+  path: ["confirmPassword"]
+});
+
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -36,10 +40,10 @@ export default function AuthPage() {
   const { user, isLoading, loginMutation, registerMutation } = useAuth();
   const [, navigate] = useLocation();
   const [, params] = useRoute("/auth");
-  
+
   // Check URL parameters for active tab
   const [activeTab, setActiveTab] = useState<"login" | "register">("login");
-  
+
   useEffect(() => {
     // Check if the URL has a register parameter
     const urlParams = new URLSearchParams(window.location.search);
@@ -61,12 +65,17 @@ export default function AuthPage() {
   const registerForm = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      username: "",
+      firstname: "",
+      lastname: "",
+      email: "",
+      age: 0,
+      sexe: "Homme",
+      illness: [],
+      allergy: [],
       password: "",
-      confirmPassword: "",
-      profile: "public",
-      display_name: "",
-    },
+      confirmPassword: ""
+    }
+
   });
 
   // Redirect if already logged in
@@ -83,12 +92,12 @@ export default function AuthPage() {
   async function onRegisterSubmit(data: RegisterFormValues) {
     // Remove the confirmPassword field which isn't in the API schema
     const { confirmPassword, ...userData } = data;
-    
+
     // Set a default display name if not provided
     if (!userData.display_name) {
       userData.display_name = userData.username;
     }
-    
+
     await registerMutation.mutateAsync(userData);
   }
 
@@ -116,13 +125,13 @@ export default function AuthPage() {
               <span className="text-xl font-semibold text-slate-900">AirShield</span>
             </div>
           </div>
-          
+
           <Tabs defaultValue={activeTab} value={activeTab} onValueChange={(value) => setActiveTab(value as "login" | "register")} className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="login">Connexion</TabsTrigger>
               <TabsTrigger value="register">Inscription</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="login">
               <Card>
                 <CardHeader>
@@ -160,9 +169,9 @@ export default function AuthPage() {
                           </FormItem>
                         )}
                       />
-                      <Button 
-                        type="submit" 
-                        className="w-full" 
+                      <Button
+                        type="submit"
+                        className="w-full"
                         disabled={loginMutation.isPending}
                       >
                         {loginMutation.isPending ? (
@@ -190,7 +199,7 @@ export default function AuthPage() {
                 </CardFooter>
               </Card>
             </TabsContent>
-            
+
             <TabsContent value="register">
               <Card>
                 <CardHeader>
@@ -202,32 +211,53 @@ export default function AuthPage() {
                 <CardContent>
                   <Form {...registerForm}>
                     <form onSubmit={registerForm.handleSubmit(onRegisterSubmit)} className="space-y-4">
+
+                      {/* Prénom */}
                       <FormField
                         control={registerForm.control}
-                        name="username"
+                        name="firstname"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Nom d'utilisateur</FormLabel>
+                            <FormLabel>Prénom</FormLabel>
                             <FormControl>
-                              <Input placeholder="Choisissez un nom d'utilisateur" {...field} />
+                              <Input placeholder="Jean" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
+
+                      {/* Nom */}
                       <FormField
                         control={registerForm.control}
-                        name="display_name"
+                        name="lastname"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Nom d'affichage (optionnel)</FormLabel>
+                            <FormLabel>Nom</FormLabel>
                             <FormControl>
-                              <Input placeholder="Comment souhaitez-vous être appelé ?" {...field} />
+                              <Input placeholder="Dupont" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
+
+                      {/* Email */}
+                      <FormField
+                        control={registerForm.control}
+                        name="email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Email</FormLabel>
+                            <FormControl>
+                              <Input type="email" placeholder="exemple@email.com" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Mot de passe */}
                       <FormField
                         control={registerForm.control}
                         name="password"
@@ -241,6 +271,8 @@ export default function AuthPage() {
                           </FormItem>
                         )}
                       />
+
+                      {/* Confirmation mot de passe */}
                       <FormField
                         control={registerForm.control}
                         name="confirmPassword"
@@ -254,41 +286,89 @@ export default function AuthPage() {
                           </FormItem>
                         )}
                       />
+
+                      {/* Sexe */}
                       <FormField
                         control={registerForm.control}
-                        name="profile"
+                        name="sexe"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Type de profil</FormLabel>
+                            <FormLabel>Sexe</FormLabel>
                             <FormControl>
                               <select
-                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                                 {...field}
                               >
-                                <option value="public">Grand public (sportifs, familles, voyageurs)</option>
-                                <option value="sensible">Profil sensible (maladies respiratoires)</option>
+                                <option value="">Sélectionnez...</option>
+                                <option value="Homme">Homme</option>
+                                <option value="Femme">Femme</option>
+                                <option value="Autre">Autre</option>
                               </select>
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
-                      <Button 
-                        type="submit" 
-                        className="w-full" 
-                        disabled={registerMutation.isPending}
-                      >
-                        {registerMutation.isPending ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Inscription en cours...
-                          </>
-                        ) : (
-                          "S'inscrire"
+
+                      {/* Âge */}
+                      <FormField
+                        control={registerForm.control}
+                        name="age"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Âge</FormLabel>
+                            <FormControl>
+                              <Input type="number" min="0" placeholder="30" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
                         )}
+                      />
+
+                      {/* Maladies (illness) */}
+                      <FormField
+                        control={registerForm.control}
+                        name="illness"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Maladies (si applicable)</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="ex: asthme, diabète"
+                                {...field}
+                                onChange={(e) => field.onChange(e.target.value.split(',').map(str => str.trim()))}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      {/* Allergies (allergy) */}
+                      <FormField
+                        control={registerForm.control}
+                        name="allergy"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Allergies (si applicable)</FormLabel>
+                            <FormControl>
+                              <Input
+                                placeholder="ex: pollen, arachides"
+                                {...field}
+                                onChange={(e) => field.onChange(e.target.value.split(',').map(str => str.trim()))}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <Button type="submit" className="w-full">
+                        Créer un compte
                       </Button>
                     </form>
                   </Form>
+
                 </CardContent>
                 <CardFooter className="flex flex-col space-y-4">
                   <div className="text-center text-sm text-slate-600 mt-2">
@@ -306,7 +386,7 @@ export default function AuthPage() {
           </Tabs>
         </div>
       </div>
-      
+
       {/* Right column - Hero */}
       <div className="hidden lg:flex flex-1 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-sky-500 to-blue-600">
@@ -318,7 +398,7 @@ export default function AuthPage() {
             <p className="text-lg mb-8 text-sky-100">
               Votre plateforme pour surveiller la qualité de l'air, les niveaux de pollen et les conditions météorologiques en temps réel.
             </p>
-            
+
             <div className="space-y-6">
               <div className="flex items-start">
                 <div className="flex-shrink-0 p-1.5 rounded-full bg-sky-400/10 mr-3">
@@ -331,7 +411,7 @@ export default function AuthPage() {
                   <p className="text-sky-100 text-sm">Recevez des informations adaptées à votre profil, qu'il soit sensible ou grand public.</p>
                 </div>
               </div>
-              
+
               <div className="flex items-start">
                 <div className="flex-shrink-0 p-1.5 rounded-full bg-sky-400/10 mr-3">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -343,7 +423,7 @@ export default function AuthPage() {
                   <p className="text-sky-100 text-sm">Soyez informé immédiatement en cas de changements importants dans votre environnement.</p>
                 </div>
               </div>
-              
+
               <div className="flex items-start">
                 <div className="flex-shrink-0 p-1.5 rounded-full bg-sky-400/10 mr-3">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

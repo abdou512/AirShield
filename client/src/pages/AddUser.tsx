@@ -1,92 +1,228 @@
-// src/components/UserForm.tsx
 import React, { useState } from "react";
+import axios from "axios";
+import "./RegisterForm.css"; // Vous pouvez créer ce fichier CSS séparément
 
-export const UserForm = () => {
-  const [form, setForm] = useState({
+const RegisterForm = () => {
+  const [formData, setFormData] = useState({
+    username: "",
     firstname: "",
     lastname: "",
     email: "",
     password: "",
+    confirmPassword: "",
     age: "",
     sexe: "H",
     illness: "",
     allergy: ""
   });
 
-  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState({ text: "", type: "" });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setMessage({ text: "", type: "" });
 
-    const user = {
-      firstname: form.firstname,
-      lastname: form.lastname,
-      email: form.email,
-      password: form.password,
-      age: parseInt(form.age, 10),
-      sexe: form.sexe,
-      illness: form.illness.split(",").map((s) => s.trim()).filter(Boolean),
-      allergy: form.allergy.split(",").map((s) => s.trim()).filter(Boolean)
-    };
+    // Validation côté client simple
+    if (formData.password !== formData.confirmPassword) {
+      setMessage({ text: "Les mots de passe ne correspondent pas", type: "error" });
+      setLoading(false);
+      return;
+    }
 
     try {
-      const res = await fetch("/api/users", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(user)
+      // Préparer les données exactement comme le modèle MongoDB les attend
+      const userData = {
+        username: formData.username,
+        firstname: formData.firstname,
+        lastname: formData.lastname,
+        email: formData.email,
+        password: formData.password,
+        age: parseInt(formData.age, 10),
+        sexe: formData.sexe,
+        illness: formData.illness ? formData.illness.split(",").map(item => item.trim()).filter(Boolean) : [],
+        allergy: formData.allergy ? formData.allergy.split(",").map(item => item.trim()).filter(Boolean) : []
+      };
+
+      console.log("Données envoyées:", userData); // Pour déboguer
+
+      const response = await axios.post("/users", userData);
+      
+      setMessage({ text: "Inscription réussie!", type: "success" });
+      setFormData({
+        username: "",
+        firstname: "",
+        lastname: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        age: "",
+        sexe: "H",
+        illness: "",
+        allergy: ""
       });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        setMessage("✅ Utilisateur créé avec succès !");
-        setForm({
-          firstname: "",
-          lastname: "",
-          email: "",
-          password: "",
-          age: "",
-          sexe: "H",
-          illness: "",
-          allergy: ""
-        });
-      } else {
-        setMessage("❌ Erreur : " + JSON.stringify(data.error));
-      }
-    } catch (err) {
-      setMessage("❌ Une erreur est survenue.");
-      console.error(err);
+    } catch (error) {
+      console.error("Erreur d'inscription:", error);
+      const errorMessage = error.response?.data?.error || "Une erreur est survenue lors de l'inscription";
+      setMessage({ text: errorMessage, type: "error" });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ maxWidth: 400, margin: "0 auto" }}>
-      <h2>Créer un utilisateur</h2>
-
-      <input name="firstname" placeholder="Prénom" value={form.firstname} onChange={handleChange} required />
-      <input name="lastname" placeholder="Nom" value={form.lastname} onChange={handleChange} required />
-      <input type="email" name="email" placeholder="Email" value={form.email} onChange={handleChange} required />
-      <input type="password" name="password" placeholder="Mot de passe" value={form.password} onChange={handleChange} required />
-      <input type="number" name="age" placeholder="Âge" value={form.age} onChange={handleChange} required />
-      
-      <select name="sexe" value={form.sexe} onChange={handleChange} required>
-        <option value="H">Homme</option>
-        <option value="F">Femme</option>
-        <option value="Autre">Autre</option>
-      </select>
-
-      <input name="illness" placeholder="Maladies (virgule entre chaque)" value={form.illness} onChange={handleChange} />
-      <input name="allergy" placeholder="Allergies (virgule entre chaque)" value={form.allergy} onChange={handleChange} />
-
-      <button type="submit">Créer l'utilisateur</button>
-
-      {message && <p>{message}</p>}
-    </form>
+    <div className="register-container">
+      <div className="register-form-wrapper">
+        <h2>Créer un compte</h2>
+        
+        {message.text && (
+          <div className={`message ${message.type}`}>
+            {message.text}
+          </div>
+        )}
+        
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="username">Nom d'utilisateur*</label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              value={formData.username}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="firstname">Prénom*</label>
+              <input
+                type="text"
+                id="firstname"
+                name="firstname"
+                value={formData.firstname}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="lastname">Nom*</label>
+              <input
+                type="text"
+                id="lastname"
+                name="lastname"
+                value={formData.lastname}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="email">Email*</label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="age">Âge*</label>
+              <input
+                type="number"
+                id="age"
+                name="age"
+                min="1"
+                value={formData.age}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            
+            <div className="form-group">
+              <label htmlFor="sexe">Sexe*</label>
+              <select
+                id="sexe"
+                name="sexe"
+                value={formData.sexe}
+                onChange={handleChange}
+                required
+              >
+                <option value="H">Homme</option>
+                <option value="F">Femme</option>
+                <option value="Autre">Autre</option>
+              </select>
+            </div>
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="password">Mot de passe*</label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="confirmPassword">Confirmer le mot de passe*</label>
+            <input
+              type="password"
+              id="confirmPassword"
+              name="confirmPassword"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="illness">Maladies (séparées par des virgules)</label>
+            <input
+              type="text"
+              id="illness"
+              name="illness"
+              value={formData.illness}
+              onChange={handleChange}
+              placeholder="Ex: asthme, diabète"
+            />
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="allergy">Allergies (séparées par des virgules)</label>
+            <input
+              type="text"
+              id="allergy"
+              name="allergy"
+              value={formData.allergy}
+              onChange={handleChange}
+              placeholder="Ex: arachides, lactose"
+            />
+          </div>
+          
+          <button type="submit" disabled={loading}>
+            {loading ? "Inscription en cours..." : "S'inscrire"}
+          </button>
+        </form>
+      </div>
+    </div>
   );
 };
-export default UserForm;
+
+export default RegisterForm;

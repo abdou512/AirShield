@@ -25,11 +25,11 @@ function useLoginMutation() {
   
   return useMutation({
     mutationFn: async (credentials: LoginData) => {
-      const res = await apiRequest("POST", "/api/login", credentials);
+      const res = await apiRequest("POST", "/login", credentials);
       return await res.json();
     },
     onSuccess: (user: User) => {
-      queryClient.setQueryData(["/api/user"], user);
+      queryClient.setQueryData(["/users"], user);
       toast({
         title: "Connexion réussie",
         description: `Bienvenue, ${user.firstname}!`,
@@ -50,11 +50,11 @@ function useRegisterMutation() {
   
   return useMutation({
     mutationFn: async (credentials: InsertUser) => {
-      const res = await apiRequest("POST", "/api/register", credentials);
+      const res = await apiRequest("POST", "/register", credentials);
       return await res.json();
     },
     onSuccess: (user: User) => {
-      queryClient.setQueryData(["/api/user"], user);
+      queryClient.setQueryData(["/user"], user);
       toast({
         title: "Inscription réussie",
         description: `Bienvenue, ${user.firstname}!`,
@@ -75,10 +75,10 @@ function useLogoutMutation() {
   
   return useMutation({
     mutationFn: async () => {
-      await apiRequest("POST", "/api/logout");
+      await apiRequest("POST", "/logout");
     },
     onSuccess: () => {
-      queryClient.setQueryData(["/api/user"], null);
+      queryClient.setQueryData(["/users"], null);
       toast({
         title: "Déconnexion réussie",
         description: "À bientôt!",

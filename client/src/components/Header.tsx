@@ -2,6 +2,13 @@ import { RefreshCw, Wind } from 'lucide-react';
 import { useGeolocation } from '../hooks/useGeolocation';
 import { Button } from '@/components/ui/button';
 
+
+const logout = () => {
+  localStorage.removeItem('user');
+  localStorage.removeItem('token');
+  window.location.href = '/login';
+}
+
 const Header = () => {
   const { locationName, loading } = useGeolocation();
 
@@ -48,6 +55,15 @@ const Header = () => {
             className="text-blue-500 hover:text-blue-700"
           >
             <RefreshCw className="h-4 w-4" />
+          </Button>
+
+          <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={logout} 
+                      className="text-blue-500 hover:text-blue-700"
+                    >
+            logout
           </Button>
         </div>
       </div>

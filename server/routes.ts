@@ -90,7 +90,12 @@ router.post("/login", async (req, res) => {
       username: user.username,
       email: user.email,
       firstname: user.firstname,
-      lastname: user.lastname
+      lastname: user.lastname,
+      age: user.age,
+      sexe: user.sexe,
+      illness: user.illness,
+      allergy: user.allergy,
+      created_at: user.created_at
     };
 
     res.status(200).json({

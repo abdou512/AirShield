@@ -7,7 +7,7 @@ export function useProfile() {
 
   useEffect(() => {
     // Check if user has already selected a profile
-    const savedProfile = localStorage.getItem('airInfoUserProfile') as UserProfile | null;
+    const savedProfile = localStorage.getItem('token') as UserProfile | null;
     if (savedProfile) {
       setUserProfileState(savedProfile);
     }

@@ -18,6 +18,7 @@ interface DashboardProps {
   pollenData: PollenData;
   weatherData: WeatherData;
 }
+const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')!) : null;
 
 const Dashboard = ({ userProfile, airQualityData, pollenData, weatherData }: DashboardProps) => {
   const currentAQI = airQualityData.current.european_aqi;
@@ -49,7 +50,9 @@ const Dashboard = ({ userProfile, airQualityData, pollenData, weatherData }: Das
 
   return (
     <div>
-      <h2 className="text-2xl font-semibold mb-6">Votre tableau de bord</h2>
+      <h2 className="text-2xl font-semibold mb-6">
+        Votre tableau de bord
+      </h2>
       
       <div className="mb-6 text-sm text-slate-500">{getCurrentDate()}</div>
 

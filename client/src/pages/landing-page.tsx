@@ -73,7 +73,7 @@ export default function LandingPage() {
                 Accédez aux informations en temps réel sur la qualité de l'air, les niveaux de pollen et les conditions météorologiques dans votre région pour prendre soin de votre santé.
               </p>
               <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-                <Link href="/auth?register=true">
+                <Link href="/register">
                   <Button size="lg" className="bg-sky-600 hover:bg-sky-700">
                     Commencer maintenant
                   </Button>
@@ -226,7 +226,7 @@ export default function LandingPage() {
           <p className="text-lg text-sky-100 mb-8 max-w-2xl mx-auto">
             Rejoignez des milliers d'utilisateurs qui font confiance à AirVision pour rester informés sur leur environnement.
           </p>
-          <Link href="/auth?register=true">
+          <Link href="/register">
             <Button size="lg" variant="secondary" className="bg-white text-sky-700 hover:bg-sky-50">
               Créer un compte gratuit
             </Button>
